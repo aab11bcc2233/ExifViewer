@@ -37,5 +37,9 @@ dependencies {
     compile "com.github.bumptech.glide:glide:$glide_version"
     annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
 
-    compile 'com.yanzhenjie:permission:1.1.1'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.okio:okio:1.13.0'
+
+    compile 'com.github.lsjwzh.RecyclerViewPager:lib:v1.1.2@aar'
+
 }

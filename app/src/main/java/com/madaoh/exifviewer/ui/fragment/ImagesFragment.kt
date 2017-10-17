@@ -56,7 +56,7 @@ class ImagesFragment : Fragment() {
                     val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA))
                     val fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME))
                     val size = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.SIZE))
-                    val date = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED))
+                    val date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED))
 
                     val item = FileItem(path, fileName, size, date, FileItem.Type.Image)
                     list.add(item)
