@@ -1,21 +1,21 @@
 package com.madaoh.exifviewer
 
-import android.content.Intent
-import android.net.Uri
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
-import kotlinx.android.synthetic.main.activity_image_detail.*
-import android.provider.MediaStore
 import android.content.ContentResolver
+import android.content.Intent
 import android.media.ExifInterface
+import android.net.Uri
+import android.os.Bundle
+import android.provider.MediaStore
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
 import android.text.format.Formatter
+import android.util.Log
 import android.view.Window
 import com.madaoh.StatusBarUtils
 import com.madaoh.exifviewer.model.FileItem
 import com.madaoh.exifviewer.ui.adapter.ImagesAdapter
+import kotlinx.android.synthetic.main.activity_image_detail.*
 
 
 class ImageDetailActivity : AppCompatActivity() {
@@ -34,7 +34,7 @@ class ImageDetailActivity : AppCompatActivity() {
 
     private fun handlerIntent(intent: Intent?) {
         when (intent?.action) {
-            Intent.ACTION_SEND -> if (intent?.type.startsWith("image/")) handleImage(intent)
+            Intent.ACTION_SEND, Intent.ACTION_VIEW -> if (intent?.type.startsWith("image/")) handleImage(intent)
             Intent.ACTION_SEND_MULTIPLE -> if (intent?.type.startsWith("image/")) handleImages(intent)
             else -> Log.d(javaClass.simpleName, "not have intent")
         }

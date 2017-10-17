@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Build
 import android.support.annotation.IdRes
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowManager
@@ -22,12 +21,12 @@ object StatusBarUtils {
         }
 
         val window = activity.window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setSystemUiVisibility(window)
+            window.statusBarColor = Color.TRANSPARENT
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setSystemUiVisibility(window)
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.statusBarColor = Color.TRANSPARENT
-            }
         }
     }
 
