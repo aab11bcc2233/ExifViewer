@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">ExifViewer</string>
+
+    <string name="button_allow">Allow</string>
+    <string name="button_deny">Deny</string>
+    <string name="permission_camera_rationale">需要读取图片信息的权限</string>
+    <string name="permission_grant_faild">权限申请失败</string>
+    <string name="why_need_permissions">需要相应的权限去读取图片信息</string>
+    <string name="go_setting">去设置</string>
+    <string name="instructions_for_use">请在 相册 应用中选中图片，并点击 分享，在分享面板中选择本应用。或者在 我的文件 中选中图片并打开，在打开面板中选择本应用。</string>
+    <string name="album">相册</string>
+    <string name="share">分享</string>
+    <string name="my_file">我的文件</string>
+    <string name="open">打开</string>
 </resources>

@@ -1,22 +1,29 @@
 package com.madaoh.exifviewer
 
+import android.Manifest
 import android.content.ContentResolver
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.Settings
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
 import android.text.format.Formatter
 import android.util.Log
+import android.view.View
 import android.view.Window
 import com.madaoh.StatusBarUtils
 import com.madaoh.exifviewer.model.FileItem
 import com.madaoh.exifviewer.ui.adapter.ImagesAdapter
 import kotlinx.android.synthetic.main.activity_image_detail.*
-
 
 class ImageDetailActivity : AppCompatActivity() {
 
@@ -29,8 +36,35 @@ class ImageDetailActivity : AppCompatActivity() {
 
         imageList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        handlerIntent(intent)
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 100)
+
     }
+
+    private fun checkPermissionStorage(): Boolean {
+        return checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    }
+
+    private fun checkPermission(permission: String): Boolean {
+        return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, permission)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (checkPermissionStorage()) {
+            handlerIntent(intent)
+        } else {
+            AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.permission_grant_faild))
+                    .setMessage(getString(R.string.why_need_permissions))
+                    .setNegativeButton(getString(R.string.go_setting), DialogInterface.OnClickListener { dialogInterface, i -> toSetting(400) })
+                    .setOnDismissListener {
+                        finish()
+                    }
+                    .show()
+        }
+    }
+
 
     private fun handlerIntent(intent: Intent?) {
         when (intent?.action) {
@@ -44,6 +78,7 @@ class ImageDetailActivity : AppCompatActivity() {
         var imageUris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
 
         if (imageUris.isNotEmpty()) {
+            textTitle.visibility = View.VISIBLE
             val list = imageUris.map {
                 getPhotos(it, contentResolver)!![0]
             }.toList()
@@ -56,6 +91,7 @@ class ImageDetailActivity : AppCompatActivity() {
         val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
 
         if (imageUri != null) {
+            textTitle.visibility = View.VISIBLE
             val list = getPhotos(imageUri, contentResolver)
             imageList.adapter = ImagesAdapter(list as List<FileItem>)
         }
@@ -146,4 +182,11 @@ class ImageDetailActivity : AppCompatActivity() {
         Log.d("MainActivity", msg)
     }
 
+
+    private fun toSetting(requestCode: Int) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", getPackageName(), null)
+        intent.data = uri
+        startActivityForResult(intent, requestCode)
+    }
 }

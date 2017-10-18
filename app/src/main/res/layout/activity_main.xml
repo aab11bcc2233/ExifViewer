@@ -7,10 +7,17 @@
     android:layout_height="match_parent"
     tools:context="com.madaoh.exifviewer.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/content_frame"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:gravity="top"
+        android:textSize="18sp"
+        android:paddingTop="40dp"
+        android:lineSpacingExtra="4dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textColor="@color/key_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
