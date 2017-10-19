@@ -1,6 +1,8 @@
 package com.madaoh.exifviewer
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.ContentResolver
 import android.content.DialogInterface
 import android.content.Intent
@@ -15,6 +17,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.text.TextUtils
 import android.text.format.DateFormat
 import android.text.format.Formatter
 import android.util.Log
@@ -24,6 +27,8 @@ import com.madaoh.StatusBarUtils
 import com.madaoh.exifviewer.model.FileItem
 import com.madaoh.exifviewer.ui.adapter.ImagesAdapter
 import kotlinx.android.synthetic.main.activity_image_detail.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 class ImageDetailActivity : AppCompatActivity() {
 
@@ -36,12 +41,16 @@ class ImageDetailActivity : AppCompatActivity() {
 
         imageList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 100)
+        if (checkPermissionStorage()) {
+            handlerIntent(intent)
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+        }
 
     }
 
     private fun checkPermissionStorage(): Boolean {
-        return checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        return checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     private fun checkPermission(permission: String): Boolean {
@@ -79,21 +88,41 @@ class ImageDetailActivity : AppCompatActivity() {
 
         if (imageUris.isNotEmpty()) {
             textTitle.visibility = View.VISIBLE
-            val list = imageUris.map {
-                getPhotos(it, contentResolver)!![0]
-            }.toList()
 
-            imageList.adapter = ImagesAdapter(list)
+            doAsync {
+                val list = imageUris.map {
+                    getPhotos(it, contentResolver)!![0]
+                }.toList()
+
+                uiThread {
+                    imageList.adapter = ImagesAdapter(list)
+                }
+            }
+
+        } else {
+            alphaAnimateStart()
         }
     }
 
     private fun handleImage(intent: Intent) {
-        val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+        var imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+
+        if (imageUri == null) {
+            imageUri = intent.data
+        }
 
         if (imageUri != null) {
             textTitle.visibility = View.VISIBLE
-            val list = getPhotos(imageUri, contentResolver)
-            imageList.adapter = ImagesAdapter(list as List<FileItem>)
+            doAsync {
+                val list = getPhotos(imageUri, contentResolver)
+
+                uiThread {
+                    imageList.adapter = ImagesAdapter(list as List<FileItem>)
+                }
+            }
+
+        } else {
+            alphaAnimateStart()
         }
     }
 
@@ -106,10 +135,14 @@ class ImageDetailActivity : AppCompatActivity() {
 
         if (cursor.count !== 0 && cursor.moveToFirst()) {
             do {
-                val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA))
+                var path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA))
                 val fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME))
                 val size = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.SIZE))
                 val date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED))
+
+                if (TextUtils.isEmpty(path)) {
+                    path = UriUtils.getPath(applicationContext, imageUri)
+                }
 
                 ld("uri 文件路径: $path")
                 ld("uri 文件名称: $fileName")
@@ -188,5 +221,17 @@ class ImageDetailActivity : AppCompatActivity() {
         val uri = Uri.fromParts("package", getPackageName(), null)
         intent.data = uri
         startActivityForResult(intent, requestCode)
+    }
+
+    private fun alphaAnimateStart() {
+        textEmpty.animate()
+                .alpha(1f)
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationStart(animation: Animator?) {
+                        super.onAnimationStart(animation)
+                        textEmpty.visibility = View.VISIBLE
+                    }
+                })
+                .start()
     }
 }
