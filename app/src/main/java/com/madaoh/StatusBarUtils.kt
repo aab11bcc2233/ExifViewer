@@ -5,10 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.support.annotation.IdRes
-import android.view.View
-import android.view.ViewTreeObserver
-import android.view.Window
-import android.view.WindowManager
+import android.view.*
 
 /**
  * Created by tianpeng on 16/9/7.
@@ -77,6 +74,58 @@ object StatusBarUtils {
                             val r = view.paddingRight
                             val b = view.paddingBottom
                             view.setPadding(l, statusBarHeight, r, b)
+
+                            view.viewTreeObserver.removeOnPreDrawListener(this)
+                            return true
+                        }
+                    })
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    fun addStatusBarHeightAndSetMarginTopByViewId(context: Activity, @IdRes viewID: Int) {
+        addStatusBarHeightAndSetMarginTop(context, viewID)
+
+    }
+
+    fun addStatusBarHeightAndSetMarginTopByView(context: Activity, view: View) {
+        if (view != null) {
+            addStatusBarHeightAndSetMarginTop(context, view)
+        }
+    }
+
+    /**
+     * 给View加上状态栏的高度
+     */
+    private fun addStatusBarHeightAndSetMarginTop(context: Context, obj: Any) {
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            return
+        }
+
+        try {
+            val view: View?
+            if (obj is Int) {
+                view = (context as Activity).window.decorView.findViewById<View>(obj)
+            } else if (obj is View) {
+                view = obj
+            } else {
+                return
+            }
+
+            view?.viewTreeObserver?.addOnPreDrawListener(
+                    object : ViewTreeObserver.OnPreDrawListener {
+                        override fun onPreDraw(): Boolean {
+                            var params = view.layoutParams
+
+                            val statusBarHeight = getStatusBarHeight(
+                                    context.applicationContext)
+                            if (params is ViewGroup.MarginLayoutParams) {
+                                params.topMargin = statusBarHeight
+                                view.layoutParams = params
+                            }
 
                             view.viewTreeObserver.removeOnPreDrawListener(this)
                             return true

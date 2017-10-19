@@ -1,11 +1,16 @@
 package com.madaoh.exifviewer
 
+import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
+import android.view.View
+import android.view.Window
+import com.madaoh.StatusBarUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -13,7 +18,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            window.statusBarColor = Color.TRANSPARENT
+        }
+
         setContentView(R.layout.activity_main)
+
+        StatusBarUtils.addStatusBarHeightAndSetPaddingByView(this, titleBar)
 
         setText()
     }
